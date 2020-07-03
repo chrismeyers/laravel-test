@@ -2,7 +2,9 @@
 
 namespace App\Http;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
+use Illuminate\Routing\Router;
 
 class Kernel extends HttpKernel
 {
@@ -63,5 +65,19 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'force.json' => \App\Http\Middleware\ForceJson::class,
     ];
+
+    /**
+     * @inheritDoc
+     */
+    public function __construct(Application $app, Router $router)
+    {
+        // Add higher priority middleware before framework defined list
+        $this->middlewarePriority = array_merge([
+            \App\Http\Middleware\ForceJson::class,
+        ], $this->middlewarePriority);
+
+        parent::__construct($app, $router);
+    }
 }

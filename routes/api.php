@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::get('/ping', function () {
+    return ['message' => 'pong'];
+});
+
+Route::middleware(['force.json', 'auth:api'])->group(function () {
+    Route::get('/secret', function (Request $request) {
+        return [
+            'decoded_jwt' => json_decode(Auth::token()),
+            'can_manage_account' => Auth::hasRole('account', 'manage-account')
+        ];
+    });
 });
