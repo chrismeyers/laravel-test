@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use KeycloakGuard\Exceptions\KeycloakGuardException;
+use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,10 +38,6 @@ class Handler extends ExceptionHandler
      */
     public function report(Throwable $exception)
     {
-        if ($exception instanceof KeycloakGuardException) {
-            abort(401, $exception->getMessage());
-        }
-
         parent::report($exception);
     }
 
@@ -55,6 +52,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
+        if ($exception instanceof KeycloakGuardException) {
+            return response()->json(
+                ['error' => $exception->getMessage()],
+                Response::HTTP_UNAUTHORIZED
+            );
+        }
+
         return parent::render($request, $exception);
     }
 }
